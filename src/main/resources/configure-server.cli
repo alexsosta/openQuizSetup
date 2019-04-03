@@ -1,0 +1,25 @@
+# Batch script to configure the security domain and define the database query used to authenticate users
+batch
+
+#Configure custom authentication filter
+/subsystem=undertow/configuration=filter/custom-filter="custom-auth-filter":add(class-name=com.xartifex.wildfly.custom.security.PreventBasicAuthPopupFilter,module=com.xartifex.wildfly.custom.security)
+/subsystem=undertow/server=default-server/host=default-host/filter-ref=custom-auth-filter:add()
+
+#Configure access logs:
+/subsystem=undertow/server=default-server/host=default-host/setting=access-log:\
+  add(pattern="%h %t %u \"%r\" %s \"%{i,User-Agent}\"", use-server-log=true)
+
+# Configure the simple-quiz domain
+/subsystem=security/security-domain=simple-quiz/:add(cache-type=default)
+/subsystem=security/security-domain=simple-quiz/authentication=classic:add(login-modules=[{"code"=>"Database", "flag"=>"required", "module-options"=>[("dsJndiName"=>"java:jboss/datasources/SimpleQuizDS"),("principalsQuery"=>"SELECT PASSWORD FROM USERS WHERE EMAIL = ?"), ("rolesQuery"=>"SELECT R.ROLE, 'Roles' FROM USERS_ROLES UR INNER JOIN ROLES R ON R.ID = UR.ROLE_ID INNER JOIN USERS U ON U.ID = UR.USER_ID WHERE U.EMAIL = ?")]}])
+
+# Configure app logging
+/subsystem=logging/logger=com.xartifex:add(level=INFO)
+
+# Run the batch commands
+run-batch
+
+# Reload the server configuration
+:reload
+
+
