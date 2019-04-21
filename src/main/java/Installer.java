@@ -1,3 +1,5 @@
+
+
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -9,72 +11,18 @@ import java.nio.file.StandardOpenOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class Installer {
-    private static Installer ourInstance = new Installer();
+public class Installer implements Runnable{
 
-    public static Installer getInstance() {
-        return ourInstance;
-    }
+    private String path;
+    private String jdkPath;
+    private int port;
+    private Controller controller;
 
-    private Installer() {
-    }
-
-    String install(String path, String jdkPath) {
-        String warName = "simpleQuiz.war";
-        String zipName = "wildfly-16.0.0.Final";
-        download(path + "\\" + zipName + ".zip");
-        unpack(path, zipName + ".zip");
-        delete(path + "\\" + zipName + ".zip");
-        try {
-            ////////CONFIGURATION SERVER//////////////////////////
-            final char dm = (char) 34;
-            String text = "set " + dm + "JAVA_HOME="+ jdkPath + dm;
-            Files.write(Paths.get(path + "\\" + zipName + "\\bin\\standalone.conf.bat"), text.getBytes(), StandardOpenOption.APPEND);
-            //////////cmd///////////////////////
-            try {
-                ExportResource("configure-server.cli", path + "\\" + zipName + "\\");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            String command1 = "cmd /c start cmd.exe /c " +
-                    path + "\\" + zipName + "\\bin\\standalone.bat -b 0.0.0.0 -Djboss.http.port=80 ";
-            String command2 = path + "\\" + zipName + "\\bin\\jboss-cli.bat --connect --file=" + path + "\\" + zipName + "\\configure-server.cli";
-            Runtime.getRuntime().exec(command1);
-            while (!Ping.getInstance().crunchifyAddressReachable("127.0.0.1",80,2000));
-            Runtime.getRuntime().exec(command2);
-            ////////DEPLOYING//////////////////////////
-            try {
-                ExportResource("resources.zip", path + "\\" + zipName + "\\standalone\\deployments\\");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            unpack(path + "\\" + zipName + "\\standalone\\deployments\\","resources.zip");
-            delete(path + "\\" + zipName + "\\standalone\\deployments\\resources.zip");
-            File theDir = new File(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main");
-            theDir.mkdir();
-            Files.createDirectories(Paths.get(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main"));
-            try {
-                ExportResource("secure.zip", path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            unpack(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\", "secure.zip");
-            delete(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\secure.zip");
-            delete(path + "\\" + zipName + "\\welcome-content\\index.html");
-            try {
-                ExportResource("index.html", path + "\\" + zipName + "\\welcome-content\\");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            //////////////SETUP SQL//////////////////
-            File warnik = new File(path + "\\" + zipName + "\\standalone\\deployments\\" + warName + ".deployed");
-            while (!warnik.exists());
-            delete(path + "\\" + zipName + "\\configure-server.cli");
-            Configurator.getInstance().config();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "Application installed";
+    public Installer(String path, String jdkPath, int port, Controller controller) {
+        this.path = path;
+        this.jdkPath = jdkPath;
+        this.port = port;
+        this.controller = controller;
     }
 
     private void download(String path){
@@ -196,5 +144,68 @@ public class Installer {
             stream.close();
             resStreamOut.close();
         }
+    }
+
+    @Override
+    public void run() {
+        controller.progressTextField.setText("downloading wildfly");
+        String warName = "simpleQuiz.war";
+        String zipName = "wildfly-16.0.0.Final";
+        download(path + "\\" + zipName + ".zip");
+        controller.progressTextField.setText("unpacking wildfly");
+        unpack(path, zipName + ".zip");
+        delete(path + "\\" + zipName + ".zip");
+        try {
+            ////////CONFIGURATION SERVER//////////////////////////
+            controller.progressTextField.setText("configuring wildfly");
+            final char dm = (char) 34;
+            String text = "set " + dm + "JAVA_HOME="+ jdkPath + dm;
+            Files.write(Paths.get(path + "\\" + zipName + "\\bin\\standalone.conf.bat"), text.getBytes(), StandardOpenOption.APPEND);
+            //////////cmd///////////////////////
+            try {
+                ExportResource("configure-server.cli", path + "\\" + zipName + "\\");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            String command1 = "cmd /c start cmd.exe /c " +
+                    path + "\\" + zipName + "\\bin\\standalone.bat -b 0.0.0.0 -Djboss.http.port=" + port + " ";
+            String command2 = path + "\\" + zipName + "\\bin\\jboss-cli.bat --connect --file=" + path + "\\" + zipName + "\\configure-server.cli";
+            Runtime.getRuntime().exec(command1);
+            while (!Ping.getInstance().crunchifyAddressReachable("127.0.0.1",port,2000));
+            Runtime.getRuntime().exec(command2);
+            ////////DEPLOYING//////////////////////////
+            try {
+                ExportResource("resources.zip", path + "\\" + zipName + "\\standalone\\deployments\\");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            controller.progressTextField.setText("deploying application");
+            unpack(path + "\\" + zipName + "\\standalone\\deployments\\","resources.zip");
+            delete(path + "\\" + zipName + "\\standalone\\deployments\\resources.zip");
+            File theDir = new File(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main");
+            theDir.mkdir();
+            Files.createDirectories(Paths.get(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main"));
+            try {
+                ExportResource("secure.zip", path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            unpack(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\", "secure.zip");
+            delete(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\secure.zip");
+            delete(path + "\\" + zipName + "\\welcome-content\\index.html");
+            try {
+                ExportResource("index.html", path + "\\" + zipName + "\\welcome-content\\");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //////////////SETUP SQL//////////////////
+            File warnik = new File(path + "\\" + zipName + "\\standalone\\deployments\\" + warName + ".deployed");
+            while (!warnik.exists());
+            delete(path + "\\" + zipName + "\\configure-server.cli");
+            Configurator.getInstance().config();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        controller.progressTextField.setText("finished");
     }
 }

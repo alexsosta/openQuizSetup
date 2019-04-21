@@ -10,11 +10,14 @@ import javafx.stage.Stage;
 import java.io.File;
 
 public class Controller {
-
     @FXML
     TextField directoryTextField;
     @FXML
     TextField jdkDirectoryTextField;
+    @FXML
+    TextField portTextField;
+    @FXML
+    TextField progressTextField;
     @FXML
     Button cancelButton;
 
@@ -43,7 +46,9 @@ public class Controller {
     public void okButtonAction(ActionEvent actionEvent) {
         String path = directoryTextField.getText();
         String jdkPath = jdkDirectoryTextField.getText();
-        Installer.getInstance().install(path,jdkPath);
+        int port = Integer.parseInt(portTextField.getText());
+        Thread thread = new Thread(new Installer (path,jdkPath,port, this));
+        thread.start();
 
     }
 
@@ -51,4 +56,5 @@ public class Controller {
         Stage stage = (Stage) cancelButton.getScene().getWindow();
         stage.close();
     }
+
 }

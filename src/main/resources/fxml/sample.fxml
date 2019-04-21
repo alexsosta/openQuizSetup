@@ -9,38 +9,52 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Text?>
 
-<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="139.0" prefWidth="348.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
+<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="186.0" prefWidth="347.0" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller">
   <columnConstraints>
     <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
   </columnConstraints>
   <rowConstraints>
+    <RowConstraints />
     <RowConstraints maxHeight="0.0" minHeight="0.0" prefHeight="0.0" />
     <RowConstraints vgrow="SOMETIMES" />
-    <RowConstraints maxHeight="25.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-      <RowConstraints vgrow="SOMETIMES" />
       <RowConstraints maxHeight="25.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
       <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="38.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="48.0" minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+      <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="112.0" vgrow="SOMETIMES" />
   </rowConstraints>
    <children>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Choose directory to install program" textAlignment="CENTER" wrappingWidth="347.13671875" GridPane.rowIndex="1" />
-      <HBox prefHeight="0.0" prefWidth="348.0" GridPane.rowIndex="2">
+      <HBox prefHeight="0.0" prefWidth="348.0" GridPane.rowIndex="3">
          <children>
             <TextField fx:id="directoryTextField" alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="343.0" promptText="chosen directory" />
             <Button alignment="TOP_LEFT" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#directoryButtonAction" prefHeight="25.0" prefWidth="27.0" text="..." />
          </children>
       </HBox>
-      <ButtonBar prefHeight="0.0" prefWidth="348.0" GridPane.rowIndex="5">
-        <buttons>
-          <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#okButtonAction" text="ok" textAlignment="CENTER" />
-            <Button fx:id="cancelButton" contentDisplay="CENTER" minWidth="57.0" mnemonicParsing="false" onAction="#cancelButtonAction" text="cancel" textAlignment="CENTER" />
-        </buttons>
-      </ButtonBar>
-      <HBox maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="4">
+      <HBox maxWidth="1.7976931348623157E308" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="5">
          <children>
             <TextField fx:id="jdkDirectoryTextField" maxWidth="1.7976931348623157E308" prefHeight="25.0" prefWidth="348.0" promptText="jdk directory" />
             <Button mnemonicParsing="false" onAction="#jdkDirectoryButtonAction" text="..." />
          </children>
       </HBox>
-      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Point JDK directory" textAlignment="CENTER" wrappingWidth="347.787109375" GridPane.rowIndex="3" />
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Point JDK directory" textAlignment="CENTER" wrappingWidth="347.787109375" GridPane.rowIndex="4" />
+      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Choose directory to install" textAlignment="CENTER" wrappingWidth="348.779296875" GridPane.rowIndex="2" />
+      <HBox prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="6">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Port:" />
+            <TextField fx:id="portTextField" />
+            <ButtonBar prefHeight="29.0" prefWidth="261.0">
+              <buttons>
+                <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#okButtonAction" text="ok" textAlignment="CENTER" />
+                  <Button fx:id="cancelButton" contentDisplay="CENTER" minWidth="57.0" mnemonicParsing="false" onAction="#cancelButtonAction" text="cancel" textAlignment="CENTER" />
+              </buttons>
+            </ButtonBar>
+         </children>
+      </HBox>
+      <HBox prefHeight="30.0" prefWidth="347.0" GridPane.rowIndex="7">
+         <children>
+            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Progress:" textAlignment="CENTER" wrappingWidth="48.22265625" />
+            <TextField fx:id="progressTextField" prefHeight="25.0" prefWidth="302.0" />
+         </children>
+      </HBox>
    </children>
 </GridPane>
