@@ -174,12 +174,12 @@ public class Installer implements Runnable{
             while (!Ping.getInstance().crunchifyAddressReachable("127.0.0.1",port,2000));
             Runtime.getRuntime().exec(command2);
             ////////DEPLOYING//////////////////////////
+            controller.progressTextField.setText("deploying application");
             try {
                 ExportResource("resources.zip", path + "\\" + zipName + "\\standalone\\deployments\\");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            controller.progressTextField.setText("deploying application");
             unpack(path + "\\" + zipName + "\\standalone\\deployments\\","resources.zip");
             delete(path + "\\" + zipName + "\\standalone\\deployments\\resources.zip");
             File theDir = new File(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main");
