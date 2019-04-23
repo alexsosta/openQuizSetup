@@ -1,5 +1,3 @@
-
-
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -11,18 +9,14 @@ import java.nio.file.StandardOpenOption;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class Installer implements Runnable{
+public class Installer {
+    private static Installer ourInstance = new Installer();
 
-    private String path;
-    private String jdkPath;
-    private int port;
-    private Controller controller;
+    public static Installer getInstance() {
+        return ourInstance;
+    }
 
-    public Installer(String path, String jdkPath, int port, Controller controller) {
-        this.path = path;
-        this.jdkPath = jdkPath;
-        this.port = port;
-        this.controller = controller;
+    private Installer() {
     }
 
     private void download(String path){
@@ -122,7 +116,7 @@ public class Installer implements Runnable{
         file.delete();
     }
 
-    static public void ExportResource(String resourceName, String dest) throws Exception {
+    private void ExportResource(String resourceName, String dest) throws Exception {
         InputStream stream = null;
         OutputStream resStreamOut = null;
         try {
@@ -146,8 +140,7 @@ public class Installer implements Runnable{
         }
     }
 
-    @Override
-    public void run() {
+    public void install(String path, String jdkPath, int port, Controller controller) {
         controller.progressTextField.setText("downloading wildfly");
         String warName = "simpleQuiz.war";
         String zipName = "wildfly-16.0.0.Final";

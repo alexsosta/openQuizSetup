@@ -1,9 +1,11 @@
 
+import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 
@@ -47,9 +49,17 @@ public class Controller {
         String path = directoryTextField.getText();
         String jdkPath = jdkDirectoryTextField.getText();
         int port = Integer.parseInt(portTextField.getText());
-        Thread thread = new Thread(new Installer (path,jdkPath,port, this));
-        thread.start();
+        Controller controller = this;
 
+        Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() throws Exception {
+                Installer.getInstance().install(path, jdkPath, port, controller);
+                return null ;
+            }
+        };
+        task.setOnSucceeded(e -> finishAlert());
+        new Thread(task).start();
     }
 
     public void cancelButtonAction(ActionEvent actionEvent) {
@@ -57,4 +67,23 @@ public class Controller {
         stage.close();
     }
 
+    public void finishAlert(){
+        String adminPage = "http://localhost/simpleQuiz/admin.html";
+        Hyperlink link = new Hyperlink();
+        link.setText(adminPage);
+        link.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Main.getInstance().getHostServices().showDocument(adminPage);
+            }
+        });
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("openQuizSetup");
+        DialogPane pane = new DialogPane();
+        pane.setHeaderText("Application installed. You can go to the administrator page by the link: ");
+        pane.setContent(link);
+        pane.getButtonTypes().addAll(ButtonType.OK);
+        alert.setDialogPane(pane);
+        alert.showAndWait();
+    }
 }
