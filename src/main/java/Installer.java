@@ -10,6 +10,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class Installer {
+
+    private static final String WAR_NAME = "simpleQuiz.war";
+    private static final String ZIP_NAME = "wildfly-16.0.0.Final";
+
     private static Installer ourInstance = new Installer();
 
     public static Installer getInstance() {
@@ -142,59 +146,57 @@ public class Installer {
 
     public void install(String path, String jdkPath, int port, Controller controller) {
         controller.progressTextField.setText("downloading wildfly");
-        String warName = "simpleQuiz.war";
-        String zipName = "wildfly-16.0.0.Final";
-        download(path + "\\" + zipName + ".zip");
+        download(path + "\\" + ZIP_NAME + ".zip");
         controller.progressTextField.setText("unpacking wildfly");
-        unpack(path, zipName + ".zip");
-        delete(path + "\\" + zipName + ".zip");
+        unpack(path, ZIP_NAME + ".zip");
+        delete(path + "\\" + ZIP_NAME + ".zip");
         try {
             ////////CONFIGURATION SERVER//////////////////////////
             controller.progressTextField.setText("configuring wildfly");
             final char dm = (char) 34;
             String text = "set " + dm + "JAVA_HOME="+ jdkPath + dm;
-            Files.write(Paths.get(path + "\\" + zipName + "\\bin\\standalone.conf.bat"), text.getBytes(), StandardOpenOption.APPEND);
+            Files.write(Paths.get(path + "\\" + ZIP_NAME + "\\bin\\standalone.conf.bat"), text.getBytes(), StandardOpenOption.APPEND);
             //////////cmd///////////////////////
             try {
-                ExportResource("configure-server.cli", path + "\\" + zipName + "\\");
+                ExportResource("configure-server.cli", path + "\\" + ZIP_NAME + "\\");
             } catch (Exception e) {
                 e.printStackTrace();
             }
             String command1 = "cmd /c start cmd.exe /c " +
-                    path + "\\" + zipName + "\\bin\\standalone.bat -b 0.0.0.0 -Djboss.http.port=" + port + " ";
-            String command2 = path + "\\" + zipName + "\\bin\\jboss-cli.bat --connect --file=" + path + "\\" + zipName + "\\configure-server.cli";
+                    path + "\\" + ZIP_NAME + "\\bin\\standalone.bat -b 0.0.0.0 -Djboss.http.port=" + port + " ";
+            String command2 = path + "\\" + ZIP_NAME + "\\bin\\jboss-cli.bat --connect --file=" + path + "\\" + ZIP_NAME + "\\configure-server.cli";
             Runtime.getRuntime().exec(command1);
             while (!Ping.getInstance().crunchifyAddressReachable("127.0.0.1",port,2000));
             Runtime.getRuntime().exec(command2);
             ////////DEPLOYING//////////////////////////
             controller.progressTextField.setText("deploying application");
             try {
-                ExportResource("resources.zip", path + "\\" + zipName + "\\standalone\\deployments\\");
+                ExportResource("resources.zip", path + "\\" + ZIP_NAME + "\\standalone\\deployments\\");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            unpack(path + "\\" + zipName + "\\standalone\\deployments\\","resources.zip");
-            delete(path + "\\" + zipName + "\\standalone\\deployments\\resources.zip");
-            File theDir = new File(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main");
+            unpack(path + "\\" + ZIP_NAME + "\\standalone\\deployments\\","resources.zip");
+            delete(path + "\\" + ZIP_NAME + "\\standalone\\deployments\\resources.zip");
+            File theDir = new File(path + "\\" + ZIP_NAME + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main");
             theDir.mkdir();
-            Files.createDirectories(Paths.get(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main"));
+            Files.createDirectories(Paths.get(path + "\\" + ZIP_NAME + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main"));
             try {
-                ExportResource("secure.zip", path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\");
+                ExportResource("secure.zip", path + "\\" + ZIP_NAME + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            unpack(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\", "secure.zip");
-            delete(path + "\\" + zipName + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\secure.zip");
-            delete(path + "\\" + zipName + "\\welcome-content\\index.html");
+            unpack(path + "\\" + ZIP_NAME + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\", "secure.zip");
+            delete(path + "\\" + ZIP_NAME + "\\modules\\com\\xartifex\\wildfly\\custom\\security\\main\\secure.zip");
+            delete(path + "\\" + ZIP_NAME + "\\welcome-content\\index.html");
             try {
-                ExportResource("index.html", path + "\\" + zipName + "\\welcome-content\\");
+                ExportResource("index.html", path + "\\" + ZIP_NAME + "\\welcome-content\\");
             } catch (Exception e) {
                 e.printStackTrace();
             }
             //////////////SETUP SQL//////////////////
-            File warnik = new File(path + "\\" + zipName + "\\standalone\\deployments\\" + warName + ".deployed");
+            File warnik = new File(path + "\\" + ZIP_NAME + "\\standalone\\deployments\\" + WAR_NAME + ".deployed");
             while (!warnik.exists());
-            delete(path + "\\" + zipName + "\\configure-server.cli");
+            delete(path + "\\" + ZIP_NAME + "\\configure-server.cli");
             Configurator.getInstance().config();
         } catch (IOException e) {
             e.printStackTrace();
